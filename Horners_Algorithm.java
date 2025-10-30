@@ -1,8 +1,7 @@
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
-import java.util.random.RandomGenerator;
-import java.util.random.RandomGeneratorFactory;
 import java.util.regex.Pattern;
 
 public class Horners_Algorithm {
@@ -15,7 +14,7 @@ public class Horners_Algorithm {
     /**
      * The regex for checking if the string is a digit.
      */
-    private static final Pattern CHECK_DIGIT = Pattern.compile("-?\\d+");
+    private static final Pattern CHECK_DIGIT = Pattern.compile("-?\\d");
 
     /**
      * Horner's Algorithm for solving polynomials.
@@ -46,34 +45,37 @@ public class Horners_Algorithm {
     public static BigInteger start(final String poly, final int x) {
         String[] arr = poly.split(TERM_SPLIT.pattern());
         int[] coefficient = new int[arr.length];
-        int[] powerArr = new int[arr.length];
+        int[] exponArr = new int[arr.length];
         boolean isInitialized = false;
 
         int index = coefficient.length - 1;
 
         for (final String eq : arr) {
 
-            final char[] sub = eq.toCharArray();
-            String[] arr2 = new String[sub.length];
-            StringBuilder sb = new StringBuilder();
+            final char[] subArgArr = eq.toCharArray();
+            String[] arr2 = new String[subArgArr.length];
+            StringBuilder coeffSB = new StringBuilder();
+            StringBuilder expoSB = new StringBuilder();
+
 
             int nullCounter = 0;
-            
-            // Counts the number of spaces in the sub string
-            for (int i = 0; i < sub.length; i++) {
-                if (sub[i] == ' ') {
+
+            // Counts the number of null spaces in the array.
+            for (int i = 0; i < subArgArr.length; i++) {
+                if (subArgArr[i] == ' ') {
                     nullCounter++;
                     continue;
                 }
 
-                arr2[i] = String.valueOf(sub[i]);
+                // Adds elements that is not an empty space.
+                arr2[i] = String.valueOf(subArgArr[i]);
             }
-            
+
+            // Creates a new temp array with of size arr2 minus the null spaces.
             final String[] temp = Arrays.copyOf(arr2, arr2.length - nullCounter);
-            
             int diff = 0;
 
-            // Removes the spaces.
+            // Copies the elements not null into a buffer.
             for (int k = 0; k < arr2.length; k++) {
                 if (arr2[k] == null) {
                     diff++;
@@ -83,10 +85,9 @@ public class Horners_Algorithm {
             }
 
             arr2 = temp;
-            StringBuilder power = new StringBuilder();
             boolean isPower = false;
 
-            // Gets the exponent value
+            // Parses the subArgArr argument, concatenate the exponent integers.
             for (final String str : arr2) {
                 if (str.equals("^")) {
                     isPower = true;
@@ -94,78 +95,73 @@ public class Horners_Algorithm {
                 }
 
                 if (isPower) {
-                    power.append(str);
+                    expoSB.append(str);
                 }
             }
 
-            // Initializes the arrays to the highest rank.
+            // Reinitialized the arrays to proper length.
             if (!isInitialized) {
-
-                int highestDegree = Integer.parseInt(power.toString()) + 1;
-                powerArr = new int[highestDegree];
+                int highestDegree = Integer.parseInt(expoSB.toString()) + 1;
+                exponArr = new int[highestDegree];
                 coefficient = new int[highestDegree];
                 index = coefficient.length - 1;
                 isInitialized = true;
             }
 
-            // Gets the coefficient.
+            // Parses the coefficients
             for (final String str : arr2) {
-                if (str.equals("x") || str.equals("^")) {
+                if (str.toLowerCase(Locale.ROOT).equals("x") || str.equals("^")) {
                     break;
                 }
-                sb.append(str);
+                coeffSB.append(str);
             }
 
 
-            if (arr2[arr2.length - 1].equals("x")) {
-                powerArr[index] = 1;
+            if (arr2[arr2.length - 1].toLowerCase(Locale.ROOT).equals("x")) {
+                exponArr[index] = 1;
 
             } else {
 
-                if (power.toString().matches(CHECK_DIGIT.pattern())) {
+                // Checks if the exponent is an integer prior to parsing it.
+                if (expoSB.toString().matches(CHECK_DIGIT.pattern())) {
 
-                    int powerInt = Integer.parseInt(power.toString());
+                    int powerInt = Integer.parseInt(expoSB.toString());
 
-                    // Appends a 0 to the missing coefficient
-                    if (arr2.length > 1 && index < powerArr.length - 1 && Math.abs(powerArr[index + 1] - powerInt) > 1) {
+                    if (arr2.length > 1 && index < exponArr.length - 1
+                            && Math.abs(exponArr[index + 1] - powerInt) > 1) {
 
-                        powerArr[index] = 0;
+                        exponArr[index] = 0;
 
                         coefficient[index] = 0;
                         index--;
 
-                        powerArr[index] = powerInt;
+                        exponArr[index] = powerInt;
 
                     } else {
-                        powerArr[index] = Integer.parseInt(power.toString());
+                        exponArr[index] = Integer.parseInt(expoSB.toString());
 
                     }
                 } else {
-                    powerArr[index] = 1;
+                    exponArr[index] = 1;
 
                 }
             }
 
-
-            // Safety checks that the coefficient is an integer before parsing.
-            if (sb.toString().matches(CHECK_DIGIT.pattern())) {
-                
-                int num = Integer.parseInt(sb.toString());
-                
+            // Checks if the coefficient is an integer prior to parsing it.
+            if (coeffSB.toString().matches(CHECK_DIGIT.pattern())) {
+                int num = Integer.parseInt(coeffSB.toString());
                 coefficient[index] = num;
-                
+
             } else {
-                if (arr2[0].equals("-") && arr2[1].equals("x")) {
-                    
+                if (arr2[0].equals("-") && arr2[1].toLowerCase(Locale.ROOT).equals("x")) {
                     coefficient[index] = -1;
 
-                } else if (arr2[0].equals("x")) {
-                    
+                } else if (arr2[0].toLowerCase(Locale.ROOT).equals("x")) {
                     coefficient[index] = 1;
                 }
             }
-            index--;
 
+            index--;
         }
         return start(coefficient, x);
     }
@@ -193,9 +189,9 @@ public class Horners_Algorithm {
 
 
         for (int i = 0; i < maxPowerDegree; i++) {
-            int number = new Random().nextInt(maxCoefficient+2);
+            int number = new Random().nextInt(maxCoefficient + 2);
             int randOper = new Random().nextInt(2);
-            int randSkip = new Random().nextInt(i, maxPowerDegree+2);
+            int randSkip = new Random().nextInt(i, maxPowerDegree + 2);
 
             if (i == 0) {
                 polynomial.append(number);
@@ -216,7 +212,7 @@ public class Horners_Algorithm {
         }
 
         System.out.printf("P(%d) = " + polynomial + "\nWhere x = %d\nSkipped: %d\n", x, x,
-                        counter);
+                counter);
 
         BigInteger result = start(polynomial.toString(), x);
 
@@ -236,8 +232,8 @@ public class Horners_Algorithm {
     public static void main(String[] args) {
 
         long startTime = System.nanoTime();
-        BigInteger result = start("x^5 - x^4+ 5x^3  + x^2 - 5x + 3", 2);
-//        stressTest(5, 1000, 10_000);
+        BigInteger result = start("-x^5-x^4+5x^3+x^2-5x+3", 3);
+        stressTest(5, 1000, 10_000);
         long stopTime = System.nanoTime();
 
         System.out.println(result);
