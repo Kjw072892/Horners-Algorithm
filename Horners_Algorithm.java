@@ -25,7 +25,6 @@ public class Horners_Algorithm {
      * @return The value of the polynomial given x.
      */
     private static BigInteger start(final int[] coeffArr, final int x) {
-//        Arrays.sort(coeffArr);
         BigInteger p = BigInteger.valueOf(coeffArr[coeffArr.length - 1]);
 
         for (int i = coeffArr.length - 2; i > -1; i--) {
