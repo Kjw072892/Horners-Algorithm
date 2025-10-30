@@ -58,7 +58,8 @@ public class Horners_Algorithm {
             StringBuilder sb = new StringBuilder();
 
             int nullCounter = 0;
-
+            
+            // Counts the number of spaces in the sub string
             for (int i = 0; i < sub.length; i++) {
                 if (sub[i] == ' ') {
                     nullCounter++;
@@ -67,9 +68,12 @@ public class Horners_Algorithm {
 
                 arr2[i] = String.valueOf(sub[i]);
             }
+            
             final String[] temp = Arrays.copyOf(arr2, arr2.length - nullCounter);
+            
             int diff = 0;
 
+            // Removes the spaces.
             for (int k = 0; k < arr2.length; k++) {
                 if (arr2[k] == null) {
                     diff++;
@@ -82,6 +86,7 @@ public class Horners_Algorithm {
             StringBuilder power = new StringBuilder();
             boolean isPower = false;
 
+            // Gets the exponent value
             for (final String str : arr2) {
                 if (str.equals("^")) {
                     isPower = true;
@@ -93,8 +98,8 @@ public class Horners_Algorithm {
                 }
             }
 
+            // Initializes the arrays to the highest rank.
             if (!isInitialized) {
-
 
                 int highestDegree = Integer.parseInt(power.toString()) + 1;
                 powerArr = new int[highestDegree];
@@ -103,6 +108,7 @@ public class Horners_Algorithm {
                 isInitialized = true;
             }
 
+            // Gets the coefficient.
             for (final String str : arr2) {
                 if (str.equals("x") || str.equals("^")) {
                     break;
@@ -119,6 +125,8 @@ public class Horners_Algorithm {
                 if (power.toString().matches(CHECK_DIGIT.pattern())) {
 
                     int powerInt = Integer.parseInt(power.toString());
+
+                    // Appends a 0 to the missing coefficient
                     if (arr2.length > 1 && index < powerArr.length - 1 && Math.abs(powerArr[index + 1] - powerInt) > 1) {
 
                         powerArr[index] = 0;
@@ -139,18 +147,20 @@ public class Horners_Algorithm {
             }
 
 
+            // Safety checks that the coefficient is an integer before parsing.
             if (sb.toString().matches(CHECK_DIGIT.pattern())) {
+                
                 int num = Integer.parseInt(sb.toString());
-                try {
-                    coefficient[index] = num;
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    System.out.println(" ");
-                }
+                
+                coefficient[index] = num;
+                
             } else {
                 if (arr2[0].equals("-") && arr2[1].equals("x")) {
+                    
                     coefficient[index] = -1;
 
                 } else if (arr2[0].equals("x")) {
+                    
                     coefficient[index] = 1;
                 }
             }
